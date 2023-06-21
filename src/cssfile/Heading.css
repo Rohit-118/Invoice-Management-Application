@@ -1,0 +1,30 @@
+.heading {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  
+
+.abclogo {
+    width: 80px;
+    height: 80px;
+    position: fixed;
+    top: 0;
+
+  }
+
+
+.hrclogo {
+    width: 80px;
+    height: 80px;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    right: 50%;
+  }
+  
+.headingtext{
+    margin-top: 4rem;   
+    color: #E16042; 
+    font-weight: bold;
+}
