@@ -4,9 +4,10 @@ import { DataGrid } from '@material-ui/data-grid';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import { TablePagination } from '@material-ui/core';
-import { orange } from '@mui/material/colors';
+// import { orange } from '@mui/material/colors';
 import Delete from './modal/Delete';
 import Edit from './modal/Edit';
+import axios from 'axios';
 
 const columns = [
     { field: 'id', headerName: 'SL No', width: 110 },
@@ -24,7 +25,7 @@ const columns = [
 const useStyles = makeStyles((theme) => ({
     button: {
         margin: theme.spacing(1),
-        background: orange[500],
+        // background: orange[500],
     },
     tableContainer: {
         backgroundColor: 'gray',
@@ -35,13 +36,13 @@ const useStyles = makeStyles((theme) => ({
             color: 'white',
         },
         '& .MuiDataGrid-checkboxInput.Mui-checked': {
-            color: orange[500],
+            // color: orange[500],
         },
         '& .MuiDataGrid-cellCheckbox .MuiDataGrid-checkboxInput': {
-            color: orange[500],
+            // color: orange[500],
         },
         '& .MuiDataGrid-columnHeaderCheckbox .MuiDataGrid-checkboxInput': {
-            color: orange[500],
+            // color: orange[500],
         },
     },
 }));
@@ -57,7 +58,7 @@ export default function DataFaceDynamic() {
 
     useEffect(() => {
 
-        fetch('http://localhost:8081/h2h_milestone_3/ReadServlet')
+        fetch('http://localhost:8080/h2h_milestone_3/ReadServlet')
             .then((response) => response.json())
             .then((json) => {
                 // Modify the rows array to include 'id' field by incrementing and mapping with 'customer_id'
@@ -74,9 +75,10 @@ export default function DataFaceDynamic() {
         const row = rows.find((row) => row.id === id);
         return row.customerOrderID;
     };
+    // console.log(extractIdToCustomerOrderID)
 
     const handleRefreshClick = () => {
-        fetch('http://localhost:8081/h2h_milestone_3/ReadServlet')
+        fetch('http://localhost:8080/h2h_milestone_3/ReadServlet')
             .then((response) => response.json())
             .then((json) => {
                 // Modify the rows array to include 'id' field by incrementing and mapping with 'customer_id'
@@ -98,12 +100,61 @@ export default function DataFaceDynamic() {
         const row = rows.find((row) => row.id === id);
         return row;
     };
+
+    const handlePredictClick = () => {
+        // Extract the selected row's order amount value
+        const selectedRow = rows.find((row) => row.id === selectedColumns[0]);
+
+        // Prepare the data payload for the API call
+        const dataPayload = {
+            slNo: selectedRow.slNo,
+            customerOrderID: selectedRow.customerOrderID,
+            salesOrg: selectedRow.salesOrg,
+            distributionChannel: selectedRow.distributionChannel,
+            division: selectedRow.division,
+            releasedCreditValue: selectedRow.releasedCreditValue,
+            purchaseOrderType: selectedRow.purchaseOrderType,
+            companyCode: selectedRow.companyCode,
+            orderCreationDate: selectedRow.orderCreationDate,
+            orderCreationTime: selectedRow.orderCreationTime,
+            creditControlArea: selectedRow.creditControlArea,
+            soldToParty: selectedRow.soldToParty,
+            orderAmount: selectedRow.orderAmount,
+            requestedDeliveryDate: selectedRow.requestedDeliveryDate,
+            orderCurrency: selectedRow.orderCurrency,
+            creditStatus: selectedRow.creditStatus,
+            customerNumber: selectedRow.customerNumber,
+            amountInUsd: selectedRow.amountInUsd,
+            uniqueCustNumber: selectedRow.uniqueCustNumber,
+        };
+
+        // Make the API call to predict the amountInUsd
+        axios
+            .post('http://localhost:5000/predict', dataPayload)
+            .then((response) => {
+                const predictedAmount = response.data[0];
+
+                // Update the values in the selected row with the predicted amount
+                const updatedValues = {
+                    ...selectedRow,
+                    amountInUsd: predictedAmount,
+                    companyCode: selectedRow.companyCode,
+                    distributionChannel: selectedRow.distributionChannel,
+                    orderCurrency: selectedRow.orderCurrency,
+                };
+
+                // Call the handleEdit function to update the values in the backend
+                handleEdit(updatedValues);
+            })
+            .catch((error) => console.log(error));
+    };
+
     const handleEdit = (updatedValues) => {
         console.log(extractIdToCustomerOrderID(selectedColumns[0]));
         console.log(updatedValues);
         const data = extractAllColumnData(selectedColumns[0]);
         console.log(data);
-        fetch(`http://localhost:8081/h2h_milestone_3/EditServlet?amountInUsd=${data.amountInUsd}&companyCode=${updatedValues.companyCode}&creditControlArea=${data.creditControlArea}&creditStatus=${data.creditStatus}&customerNumber=${data.customerNumber}&customerOrderID=${data.customerOrderID}&distributionChannel=${updatedValues.distributionChannel}&division=${data.division}&orderAmount=${data.orderAmount}&orderCreationDate=${data.orderCreationDate}&orderCreationTime=${data.orderCreationTime}&orderCurrency=${updatedValues.orderCurrency}&purchaseOrderType=${data.purchaseOrderType}&releasedCreditValue=${data.releasedCreditValue}&requestedDeliveryDate=${data.requestedDeliveryDate}&salesOrg=${data.salesOrg}&slNo=${data.slNo}&soldToParty=${data.soldToParty}&uniqueCustNumber=${data.uniqueCustNumber}`,
+        fetch(`http://localhost:8080/h2h_milestone_3/EditServlet?amountInUsd=${data.amountInUsd}&companyCode=${updatedValues.companyCode}&creditControlArea=${data.creditControlArea}&creditStatus=${data.creditStatus}&customerNumber=${data.customerNumber}&customerOrderID=${data.customerOrderID}&distributionChannel=${updatedValues.distributionChannel}&division=${data.division}&orderAmount=${data.orderAmount}&orderCreationDate=${data.orderCreationDate}&orderCreationTime=${data.orderCreationTime}&orderCurrency=${updatedValues.orderCurrency}&purchaseOrderType=${data.purchaseOrderType}&releasedCreditValue=${data.releasedCreditValue}&requestedDeliveryDate=${data.requestedDeliveryDate}&salesOrg=${data.salesOrg}&slNo=${data.slNo}&soldToParty=${data.soldToParty}&uniqueCustNumber=${data.uniqueCustNumber}`,
             {
                 mode: 'no-cors',
                 method: 'POST',
@@ -133,7 +184,7 @@ export default function DataFaceDynamic() {
     const handleDelete = () => {
         selectedColumns.forEach((columnId) => {
             console.log(extractIdToCustomerOrderID(columnId));
-            fetch(`http://localhost:8081/h2h_milestone_3/DeleteServlet?customerOrderID=${extractIdToCustomerOrderID(columnId)}`,
+            fetch(`http://localhost:8080/h2h_milestone_3/DeleteServlet?customerOrderID=${extractIdToCustomerOrderID(columnId)}`,
                 {
                     mode: 'no-cors',
                     method: 'POST',
@@ -183,7 +234,7 @@ export default function DataFaceDynamic() {
                                     <Button variant="contained" color="primary" className={classes.button} onClick={handleRefreshClick}>REFRESH DATA</Button>
                                     <Button variant="contained" color="primary" className={classes.button} onClick={handleEditClick} disabled={selectedColumns.length !== 1}>EDIT</Button>
                                     <Button variant="contained" color="primary" className={classes.button} onClick={handleDeleteClick} disabled={selectedColumns.length < 1}>DELETE</Button>
-                                    <Button variant="contained" color="primary" className={classes.button}>PREDICT</Button>
+                                    <Button variant="contained" color="primary" className={classes.button} onClick={handlePredictClick} disabled={selectedColumns.length < 1}>PREDICT</Button>
                                 </div>
                                 <div className="MuiTablePagination-root">
                                     <TablePagination
