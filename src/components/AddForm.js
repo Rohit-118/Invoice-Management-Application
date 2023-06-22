@@ -11,7 +11,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   textField: {
-    width: '24%', // Adjust the width as per your requirement
+    width: '24%',
   },
   button: {
     margin: theme.spacing(1),
@@ -45,6 +45,20 @@ export default function AddForm() {
   const handleSubmit = (event) => {
     event.preventDefault();
     console.log(formValues);
+
+    fetch('http://localhost:8081/h2h_milestone_3/AddServlet', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formValues)
+    })
+      .then(response => response.text())
+      .then(data => console.log(data))
+      .catch(error => console.error(error));
+
+
+
   };
 
   const handleClear = () => {
@@ -132,7 +146,7 @@ export default function AddForm() {
           className={classes.textField}
           style={{ width: '16%' }}
         />
-        <Button type="submit" variant="contained" className={classes.button}>ADD</Button>
+        <Button type="submit" variant="contained" className={classes.button} >ADD</Button>
         <Button variant="contained" onClick={handleClear} className={classes.button}>CLEAR DATA</Button>
       </form>
     </div>

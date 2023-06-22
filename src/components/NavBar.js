@@ -12,6 +12,7 @@ import { alpha, makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import InputBase from '@material-ui/core/InputBase';
 import Button from '@material-ui/core/Button';
+import DataFaceDynamic from './DataFaceDynamic';
 
 
 function TabPanel(props) {
@@ -136,7 +137,7 @@ export default function NavBar() {
         </div>
       </AppBar>
       <TabPanel value={value} index={0}>
-        <DataFace />
+        <DataFaceDynamic />
       </TabPanel>
       <TabPanel value={value} index={1}>
         <AddForm />
